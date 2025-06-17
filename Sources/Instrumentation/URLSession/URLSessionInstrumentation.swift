@@ -756,11 +756,3 @@ public class URLSessionInstrumentation {
     }
   }
 }
-<<<<<<< HEAD
-=======
-
-class FakeDelegate: NSObject, URLSessionTaskDelegate {
-  func urlSession(_ session: URLSession, task: URLSessionTask,
-                  didCompleteWithError error: Error?) {}
-}
->>>>>>> main
