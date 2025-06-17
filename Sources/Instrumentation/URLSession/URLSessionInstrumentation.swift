@@ -730,10 +730,6 @@ public class URLSessionInstrumentation {
           task.setValue(instrumentedRequest, forKey: "currentRequest")
         }
         self.setIdKey(value: taskId, for: task)
-
-        if task.delegate == nil, task.state != .running, (task.value(forKey: "session") as? URLSession)?.delegate == nil {
-          task.delegate = FakeDelegate()
-        }
       }
     }
   }
@@ -760,8 +756,11 @@ public class URLSessionInstrumentation {
     }
   }
 }
+<<<<<<< HEAD
+=======
 
 class FakeDelegate: NSObject, URLSessionTaskDelegate {
   func urlSession(_ session: URLSession, task: URLSessionTask,
                   didCompleteWithError error: Error?) {}
 }
+>>>>>>> main
