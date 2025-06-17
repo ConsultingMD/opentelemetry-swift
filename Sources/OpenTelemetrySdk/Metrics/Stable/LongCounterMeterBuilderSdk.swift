@@ -6,39 +6,31 @@
 import Foundation
 import OpenTelemetryApi
 
-public class LongCounterMeterBuilderSdk: LongCounterBuilder, InstrumentBuilder {
-    var meterProviderSharedState: MeterProviderSharedState
+public class LongCounterMeterBuilderSdk: InstrumentBuilder, LongCounterBuilder {
+  init(meterProviderSharedState: inout MeterProviderSharedState,
+       meterSharedState: inout StableMeterSharedState,
+       name: String) {
+    super.init(
+      meterProviderSharedState: &meterProviderSharedState,
+      meterSharedState: &meterSharedState,
+      type: .counter,
+      valueType: .long,
+      description: "",
+      unit: "",
+      instrumentName: name
+    )
+  }
 
-    var meterSharedState: StableMeterSharedState
+  public func ofDoubles() -> DoubleCounterMeterBuilderSdk {
+    swapBuilder(DoubleCounterMeterBuilderSdk.init)
+  }
 
-    let type: InstrumentType = .counter
+  public func build() -> LongCounterSdk {
+    return buildSynchronousInstrument(LongCounterSdk.init)
+  }
 
-    let valueType: InstrumentValueType = .long
-
-    var instrumentName: String
-
-    var description: String = ""
-
-    var unit: String = ""
-
-    init(meterProviderSharedState: inout MeterProviderSharedState,
-         meterSharedState: inout StableMeterSharedState,
-         name: String) {
-        self.meterProviderSharedState = meterProviderSharedState
-        self.meterSharedState = meterSharedState
-        self.instrumentName = name
-    }
-
-    public func ofDoubles() -> OpenTelemetryApi.DoubleCounterBuilder {
-        swapBuilder(DoubleCounterMeterBuilderSdk.init)
-    }
-
-    public func build() -> OpenTelemetryApi.LongCounter {
-        return buildSynchronousInstrument(LongCounterSdk.init)
-    }
-
-    public func buildWithCallback(_ callback: @escaping (OpenTelemetryApi.ObservableLongMeasurement) -> Void)
-        -> OpenTelemetryApi.ObservableLongCounter {
-        registerLongAsynchronousInstrument(type: .observableCounter, updater: callback)
-    }
+  public func buildWithCallback(_ callback: @escaping (StableObservableMeasurementSdk) -> Void)
+    -> ObservableInstrumentSdk {
+    registerLongAsynchronousInstrument(type: .observableCounter, updater: callback)
+  }
 }

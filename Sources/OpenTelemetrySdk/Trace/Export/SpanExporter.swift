@@ -26,9 +26,11 @@ public extension SpanExporter {
   func export(spans: [SpanData]) -> SpanExporterResultCode {
     return export(spans: spans, explicitTimeout: nil)
   }
+
   func flush() -> SpanExporterResultCode {
     return flush(explicitTimeout: nil)
   }
+
   func shutdown() {
     shutdown(explicitTimeout: nil)
   }
@@ -46,7 +48,7 @@ public enum SpanExporterResultCode {
   /// - Parameter newResultCode: the result code to merge with
   mutating func mergeResultCode(newResultCode: SpanExporterResultCode) {
     // If both results are success then return success.
-    if self == .success && newResultCode == .success {
+    if self == .success, newResultCode == .success {
       self = .success
       return
     }

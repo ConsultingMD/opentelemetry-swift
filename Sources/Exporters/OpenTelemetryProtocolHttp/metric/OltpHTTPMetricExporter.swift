@@ -23,18 +23,14 @@ public class OtlpHttpMetricExporter: OtlpHttpExporterBase, MetricExporter {
   private var exporterMetrics: ExporterMetrics?
 
   override
-    public init(
-      endpoint: URL = defaultOltpHTTPMetricsEndpoint(),
-      config: OtlpConfiguration = OtlpConfiguration(),
-      useSession: URLSession? = nil,
-      envVarHeaders: [(String, String)]? = EnvVarHeaders.attributes
-    ) {
-    super.init(
-      endpoint: endpoint,
-      config: config,
-      useSession: useSession,
-      envVarHeaders: envVarHeaders
-    )
+  public init(endpoint: URL = defaultOltpHTTPMetricsEndpoint(),
+              config: OtlpConfiguration = OtlpConfiguration(),
+              useSession: URLSession? = nil,
+              envVarHeaders: [(String, String)]? = EnvVarHeaders.attributes) {
+    super.init(endpoint: endpoint,
+               config: config,
+               useSession: useSession,
+               envVarHeaders: envVarHeaders)
   }
 
   /// A `convenience` constructor to provide support for exporter metric using`StableMeterProvider` type
@@ -44,24 +40,19 @@ public class OtlpHttpMetricExporter: OtlpHttpExporterBase, MetricExporter {
   ///    - meterProvider: Injected `StableMeterProvider` for metric
   ///    - useSession: Overridden `URLSession` if any
   ///    - envVarHeaders: Extra header key-values
-  convenience public init(
-    endpoint: URL = defaultOltpHTTPMetricsEndpoint(),
-    config: OtlpConfiguration = OtlpConfiguration(),
-    meterProvider: StableMeterProvider,
-    useSession: URLSession? = nil,
-    envVarHeaders: [(String, String)]? = EnvVarHeaders.attributes
-  ) {
-    self.init(
-      endpoint: endpoint, config: config, useSession: useSession,
-      envVarHeaders: envVarHeaders)
-    exporterMetrics = ExporterMetrics(
-      type: "metric",
-      meterProvider: meterProvider,
-      exporterName: "otlp",
-      transportName: config.exportAsJson
-        ? ExporterMetrics.TransporterType.httpJson
-        : ExporterMetrics.TransporterType.grpc
-    )
+  public convenience init(endpoint: URL = defaultOltpHTTPMetricsEndpoint(),
+                          config: OtlpConfiguration = OtlpConfiguration(),
+                          meterProvider: any StableMeterProvider,
+                          useSession: URLSession? = nil,
+                          envVarHeaders: [(String, String)]? = EnvVarHeaders.attributes) {
+    self.init(endpoint: endpoint, config: config, useSession: useSession,
+              envVarHeaders: envVarHeaders)
+    exporterMetrics = ExporterMetrics(type: "metric",
+                                      meterProvider: meterProvider,
+                                      exporterName: "otlp",
+                                      transportName: config.exportAsJson
+                                        ? ExporterMetrics.TransporterType.httpJson
+                                        : ExporterMetrics.TransporterType.grpc)
   }
 
   public func export(metrics: [Metric], shouldCancel: (() -> Bool)?)
@@ -74,9 +65,9 @@ public class OtlpHttpMetricExporter: OtlpHttpExporterBase, MetricExporter {
     }
     let body =
       Opentelemetry_Proto_Collector_Metrics_V1_ExportMetricsServiceRequest.with {
-      $0.resourceMetrics = MetricsAdapter.toProtoResourceMetrics(
-        metricDataList: sendingMetrics)
-    }
+        $0.resourceMetrics = MetricsAdapter.toProtoResourceMetrics(
+          metricDataList: sendingMetrics)
+      }
 
     var request = createRequest(body: body, endpoint: endpoint)
     if let headers = envVarHeaders {
@@ -94,7 +85,7 @@ public class OtlpHttpMetricExporter: OtlpHttpExporterBase, MetricExporter {
       switch result {
       case .success:
         self?.exporterMetrics?.addSuccess(value: sendingMetrics.count)
-      case .failure(let error):
+      case let .failure(error):
         self?.exporterMetrics?.addFailed(value: sendingMetrics.count)
         self?.exporterLock.withLockVoid {
           self?.pendingMetrics.append(contentsOf: sendingMetrics)
@@ -112,10 +103,10 @@ public class OtlpHttpMetricExporter: OtlpHttpExporterBase, MetricExporter {
     if !pendingMetrics.isEmpty {
       let body =
         Opentelemetry_Proto_Collector_Metrics_V1_ExportMetricsServiceRequest
-        .with {
-          $0.resourceMetrics = MetricsAdapter.toProtoResourceMetrics(
-            metricDataList: pendingMetrics)
-        }
+          .with {
+            $0.resourceMetrics = MetricsAdapter.toProtoResourceMetrics(
+              metricDataList: pendingMetrics)
+          }
 
       let semaphore = DispatchSemaphore(value: 0)
       let request = createRequest(body: body, endpoint: endpoint)
@@ -123,7 +114,7 @@ public class OtlpHttpMetricExporter: OtlpHttpExporterBase, MetricExporter {
         switch result {
         case .success:
           self?.exporterMetrics?.addSuccess(value: count)
-        case .failure(let error):
+        case let .failure(error):
           self?.exporterMetrics?.addFailed(value: count)
           print(error)
           exporterResult = MetricExporterResultCode.failureNotRetryable

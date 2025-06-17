@@ -7,19 +7,17 @@ import Foundation
 import OpenTelemetryApi
 
 class BoundRawCounterMetricSdkBase<T>: BoundRawCounterMetric<T> {
-    internal var status: RecordStatus
-    internal var statusLock = Lock()
+  var status: RecordStatus
+  var statusLock = Lock()
 
-    init(recordStatus: RecordStatus) {
-        status = recordStatus
-        super.init()
-    }
+  init(recordStatus: RecordStatus) {
+    status = recordStatus
+    super.init()
+  }
 
-    func checkpoint() {
-    }
+  func checkpoint() {}
 
-    func getMetrics() -> [MetricData] {
-        fatalError()
-    }
-
+  func getMetrics() -> [MetricData] {
+    fatalError()
+  }
 }

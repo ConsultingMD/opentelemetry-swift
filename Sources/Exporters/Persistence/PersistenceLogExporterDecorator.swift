@@ -9,9 +9,7 @@ import OpenTelemetrySdk
 // a persistence exporter decorator for `LogRecords`.
 // specialization of `PersistenceExporterDecorator` for `LogExporter`.
 public class PersistenceLogExporterDecorator: LogRecordExporter {
-
   struct LogRecordDecoratedExporter: DecoratedExporter {
-
     typealias SignalType = ReadableLogRecord
 
     private let logRecordExporter: LogRecordExporter
@@ -25,29 +23,25 @@ public class PersistenceLogExporterDecorator: LogRecordExporter {
       return DataExportStatus(needsRetry: result == .failure)
     }
   }
+
   private let logRecordExporter: LogRecordExporter
   private let persistenceExporter:
     PersistenceExporterDecorator<LogRecordDecoratedExporter>
 
-  public init(
-    logRecordExporter: LogRecordExporter,
-    storageURL: URL,
-    exportCondition: @escaping () -> Bool = { true },
-    performancePreset: PersistencePerformancePreset = .default
-  ) throws {
-    self.persistenceExporter =
-      PersistenceExporterDecorator<LogRecordDecoratedExporter>(
-        decoratedExporter: LogRecordDecoratedExporter(
-          logRecordExporter: logRecordExporter),
-        storageURL: storageURL,
-        exportCondition: exportCondition,
-        performancePreset: performancePreset)
+  public init(logRecordExporter: LogRecordExporter,
+              storageURL: URL,
+              exportCondition: @escaping () -> Bool = { true },
+              performancePreset: PersistencePerformancePreset = .default) throws {
+    persistenceExporter =
+      PersistenceExporterDecorator<LogRecordDecoratedExporter>(decoratedExporter: LogRecordDecoratedExporter(
+        logRecordExporter: logRecordExporter),
+      storageURL: storageURL,
+      exportCondition: exportCondition,
+      performancePreset: performancePreset)
     self.logRecordExporter = logRecordExporter
   }
 
-  public func export(
-    logRecords: [ReadableLogRecord], explicitTimeout: TimeInterval? = nil
-  ) -> ExportResult {
+  public func export(logRecords: [ReadableLogRecord], explicitTimeout: TimeInterval? = nil) -> ExportResult {
     do {
       try persistenceExporter.export(values: logRecords)
       return .success
@@ -64,6 +58,5 @@ public class PersistenceLogExporterDecorator: LogRecordExporter {
   public func forceFlush(explicitTimeout: TimeInterval? = nil) -> ExportResult {
     persistenceExporter.flush()
     return logRecordExporter.forceFlush(explicitTimeout: explicitTimeout)
-
   }
 }

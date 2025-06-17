@@ -6,38 +6,28 @@
 import Foundation
 import OpenTelemetryApi
 
-public class DoubleHistogramMeterBuilderSdk: DoubleHistogramBuilder, InstrumentBuilder {
-    var meterProviderSharedState: MeterProviderSharedState
+public class DoubleHistogramMeterBuilderSdk: InstrumentBuilder, DoubleHistogramBuilder {
+  init(meterProviderSharedState: inout MeterProviderSharedState,
+       meterSharedState: inout StableMeterSharedState,
+       name: String,
+       description: String = "",
+       unit: String = "") {
+    super.init(
+      meterProviderSharedState: &meterProviderSharedState,
+      meterSharedState: &meterSharedState,
+      type: .histogram,
+      valueType: .double,
+      description: description,
+      unit: unit,
+      instrumentName: name
+    )
+  }
 
-    var meterSharedState: StableMeterSharedState
+  public func ofLongs() -> LongHistogramMeterBuilderSdk {
+    swapBuilder(LongHistogramMeterBuilderSdk.init)
+  }
 
-    let type: InstrumentType = .histogram
-
-    let valueType: InstrumentValueType = .double
-
-    let instrumentName: String
-
-    var description: String
-
-    var unit: String
-
-    init(meterProviderSharedState: inout MeterProviderSharedState,
-         meterSharedState: inout StableMeterSharedState,
-         name: String,
-         description: String = "",
-         unit: String = "") {
-        self.meterProviderSharedState = meterProviderSharedState
-        self.meterSharedState = meterSharedState
-        self.instrumentName = name
-        self.description = description
-        self.unit = unit
-    }
-
-    public func ofLongs() -> OpenTelemetryApi.LongHistogramBuilder {
-        swapBuilder(LongHistogramMeterBuilderSdk.init)
-    }
-
-    public func build() -> OpenTelemetryApi.DoubleHistogram {
-        buildSynchronousInstrument(DoubleHistogramMeterSdk.init)
-    }
+  public func build() -> DoubleHistogramMeterSdk {
+    buildSynchronousInstrument(DoubleHistogramMeterSdk.init)
+  }
 }

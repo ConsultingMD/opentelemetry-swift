@@ -7,18 +7,13 @@ import Foundation
 import OpenTelemetryApi
 
 class RawHistogramMetricSdkBase<T>: RawHistogramMetric {
-
-  func record(
-    explicitBoundaries: [T], counts: [Int], startDate: Date, endDate: Date,
-    count: Int, sum: T, labelset: LabelSet
-  ) {
+  func record(explicitBoundaries: [T], counts: [Int], startDate: Date, endDate: Date,
+              count: Int, sum: T, labelset: LabelSet) {
     // noop
   }
 
-  func record(
-    explicitBoundaries: [T], counts: [Int], startDate: Date, endDate: Date,
-    count: Int, sum: T, labels: [String: String]
-  ) {
+  func record(explicitBoundaries: [T], counts: [Int], startDate: Date, endDate: Date,
+              count: Int, sum: T, labels: [String: String]) {
     // noop
   }
 
@@ -38,10 +33,9 @@ class RawHistogramMetricSdkBase<T>: RawHistogramMetric {
 
   func bind(labels: [String: String]) -> BoundRawHistogramMetric<T> {
     bind(labelset: LabelSet(labels: labels), isShortLived: false)
-
   }
 
-  internal func bind(labelset: LabelSet, isShortLived: Bool)
+  func bind(labelset: LabelSet, isShortLived: Bool)
     -> BoundRawHistogramMetric<T> {
     var boundInstrument: BoundRawHistogramMetricSdkBase<T>?
     bindUnbindLock.withLockVoid {
@@ -73,7 +67,7 @@ class RawHistogramMetricSdkBase<T>: RawHistogramMetric {
     return boundInstrument!
   }
 
-  internal func unBind(labelSet: LabelSet) {
+  func unBind(labelSet: LabelSet) {
     bindUnbindLock.withLockVoid {
       if let boundInstrument = boundInstruments[labelSet] {
         boundInstrument.statusLock.withLockVoid {
@@ -90,5 +84,4 @@ class RawHistogramMetricSdkBase<T>: RawHistogramMetric {
     // noop
     fatalError()
   }
-
 }

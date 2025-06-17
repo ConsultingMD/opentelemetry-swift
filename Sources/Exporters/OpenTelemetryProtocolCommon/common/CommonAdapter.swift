@@ -7,9 +7,9 @@ import Foundation
 import OpenTelemetryApi
 import OpenTelemetrySdk
 
-public struct CommonAdapter {
+public enum CommonAdapter {
   public static func toProtoAttribute(key: String, attributeValue: AttributeValue)
-  -> Opentelemetry_Proto_Common_V1_KeyValue {
+    -> Opentelemetry_Proto_Common_V1_KeyValue {
     var keyValue = Opentelemetry_Proto_Common_V1_KeyValue()
     keyValue.key = key
     switch attributeValue {
@@ -22,29 +22,29 @@ public struct CommonAdapter {
     case let .double(value):
       keyValue.value.doubleValue = value
     case let .set(value):
-      keyValue.value.kvlistValue.values = value.labels.map({
+      keyValue.value.kvlistValue.values = value.labels.map {
         return toProtoAttribute(key: $0, attributeValue: $1)
-      })
+      }
     case let .array(value):
-      keyValue.value.arrayValue.values = value.values.map({
+      keyValue.value.arrayValue.values = value.values.map {
         return toProtoAnyValue(attributeValue: $0)
-      })
+      }
     case let .stringArray(value):
-      keyValue.value.arrayValue.values = value.map({
+      keyValue.value.arrayValue.values = value.map {
         return toProtoAnyValue(attributeValue: .string($0))
-      })
+      }
     case let .boolArray(value):
-      keyValue.value.arrayValue.values = value.map({
+      keyValue.value.arrayValue.values = value.map {
         return toProtoAnyValue(attributeValue: .bool($0))
-      })
+      }
     case let .intArray(value):
-      keyValue.value.arrayValue.values = value.map({
+      keyValue.value.arrayValue.values = value.map {
         return toProtoAnyValue(attributeValue: .int($0))
-      })
+      }
     case let .doubleArray(value):
-      keyValue.value.arrayValue.values = value.map({
+      keyValue.value.arrayValue.values = value.map {
         return toProtoAnyValue(attributeValue: .double($0))
-      })
+      }
     }
     return keyValue
   }
@@ -61,42 +61,46 @@ public struct CommonAdapter {
     case let .double(value):
       anyValue.doubleValue = value
     case let .set(value):
-      anyValue.kvlistValue.values = value.labels.map({
+      anyValue.kvlistValue.values = value.labels.map {
         return toProtoAttribute(key: $0, attributeValue: $1)
-      })
+      }
     case let .array(value):
-      anyValue.arrayValue.values = value.values.map({
+      anyValue.arrayValue.values = value.values.map {
         return toProtoAnyValue(attributeValue: $0)
-      })
+      }
     case let .stringArray(value):
-      anyValue.arrayValue.values = value.map({
+      anyValue.arrayValue.values = value.map {
         return toProtoAnyValue(attributeValue: .string($0))
-      })
+      }
     case let .boolArray(value):
-      anyValue.arrayValue.values = value.map({
+      anyValue.arrayValue.values = value.map {
         return toProtoAnyValue(attributeValue: .bool($0))
-      })
+      }
     case let .intArray(value):
-      anyValue.arrayValue.values = value.map({
+      anyValue.arrayValue.values = value.map {
         return toProtoAnyValue(attributeValue: .int($0))
-      })
+      }
     case let .doubleArray(value):
-      anyValue.arrayValue.values = value.map({
+      anyValue.arrayValue.values = value.map {
         return toProtoAnyValue(attributeValue: .double($0))
-      })
+      }
     }
     return anyValue
   }
 
   public static func toProtoInstrumentationScope(instrumentationScopeInfo: InstrumentationScopeInfo)
-  -> Opentelemetry_Proto_Common_V1_InstrumentationScope {
-
+    -> Opentelemetry_Proto_Common_V1_InstrumentationScope {
     var instrumentationScope = Opentelemetry_Proto_Common_V1_InstrumentationScope()
     instrumentationScope.name = instrumentationScopeInfo.name
     if let version = instrumentationScopeInfo.version {
       instrumentationScope.version = version
     }
-    return instrumentationScope
-  }
 
+    if let attributes = instrumentationScopeInfo.attributes {
+      attributes.forEach {
+        instrumentationScope.attributes.append(CommonAdapter.toProtoAttribute(key: $0.key, attributeValue: $0.value))
+      }
+    }
+  return instrumentationScope
+  }
 }

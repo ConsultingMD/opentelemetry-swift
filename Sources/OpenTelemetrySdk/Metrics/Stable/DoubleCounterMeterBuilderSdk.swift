@@ -6,39 +6,29 @@
 import Foundation
 import OpenTelemetryApi
 
-public class DoubleCounterMeterBuilderSdk: DoubleCounterBuilder, InstrumentBuilder {
-    var meterSharedState: StableMeterSharedState
+public class DoubleCounterMeterBuilderSdk: InstrumentBuilder, DoubleCounterBuilder {
+  init(meterProviderSharedState: inout MeterProviderSharedState,
+       meterSharedState: inout StableMeterSharedState,
+       name: String,
+       description: String,
+       unit: String) {
+    super.init(
+      meterProviderSharedState: &meterProviderSharedState,
+      meterSharedState: &meterSharedState,
+      type: .counter,
+      valueType: .double,
+      description: description,
+      unit: unit,
+      instrumentName: name
+    )
+  }
 
-    var meterProviderSharedState: MeterProviderSharedState
+  public func build() -> DoubleCounterSdk {
+    buildSynchronousInstrument(DoubleCounterSdk.init)
+  }
 
-    let type: InstrumentType = .counter
-
-    let valueType: InstrumentValueType = .double
-
-    var instrumentName: String
-
-    var description: String
-
-    var unit: String
-
-    init(meterProviderSharedState: MeterProviderSharedState,
-         meterSharedState: StableMeterSharedState,
-         name: String,
-         description: String,
-         unit: String) {
-        self.meterProviderSharedState = meterProviderSharedState
-        self.meterSharedState = meterSharedState
-        self.unit = unit
-        self.description = description
-        self.instrumentName = name
-    }
-
-    public func build() -> OpenTelemetryApi.DoubleCounter {
-        buildSynchronousInstrument(DoubleCounterSdk.init)
-    }
-
-    public func buildWithCallback(_ callback: @escaping (OpenTelemetryApi.ObservableDoubleMeasurement) -> Void)
-        -> OpenTelemetryApi.ObservableDoubleCounter {
-        registerDoubleAsynchronousInstrument(type: .observableCounter, updater: callback)
-    }
+  public func buildWithCallback(_ callback: @escaping (StableObservableMeasurementSdk) -> Void)
+    -> ObservableInstrumentSdk {
+    registerDoubleAsynchronousInstrument(type: .observableCounter, updater: callback)
+  }
 }
