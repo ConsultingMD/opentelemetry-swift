@@ -42,7 +42,8 @@ import Foundation
       let activityIdent = os_activity_get_identifier(OS_ACTIVITY_CURRENT, &parentIdent)
       var contextValue: AnyObject?
       rlock.lock()
-      guard let context = contextMap[activityIdent] ?? contextMap[parentIdent]
+     
+      guard let context = contextMap[activityIdent] ?? contextMap[parentIdent] ?? contextMap.first?.value
       else {
         rlock.unlock()
         return nil
