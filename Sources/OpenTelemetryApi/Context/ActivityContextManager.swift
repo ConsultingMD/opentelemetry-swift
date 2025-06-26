@@ -43,7 +43,7 @@ import Foundation
       var contextValue: AnyObject?
       rlock.lock()
      
-      guard let context = contextMap[activityIdent] ?? contextMap[parentIdent] ?? contextMap.first?.value
+      guard let context = contextMap[activityIdent] ?? contextMap[parentIdent]
       else {
         rlock.unlock()
         return nil
