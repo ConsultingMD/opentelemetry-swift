@@ -74,4 +74,25 @@
     }
   }
 
+#else
+
+  import Foundation
+
+  /// Stub for non-Darwin platforms; network status is unavailable.
+  public class NetworkStatus {
+    public private(set) var networkMonitor: NetworkMonitorProtocol
+
+    public init() throws {
+      self.networkMonitor = try NetworkMonitor()
+    }
+
+    public init(with monitor: NetworkMonitorProtocol, info: Any? = nil) {
+      networkMonitor = monitor
+    }
+
+    public func status() -> (String, String?, Any?) {
+      ("unavailable", nil, nil)
+    }
+  }
+
 #endif // os(iOS) && !targetEnvironment(macCatalyst)

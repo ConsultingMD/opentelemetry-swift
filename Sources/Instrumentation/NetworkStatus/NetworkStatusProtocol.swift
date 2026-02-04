@@ -12,4 +12,14 @@
     var networkMonitor: NetworkMonitorProtocol { get }
     func getStatus() -> (String, CTCarrier?)
   }
-#endif // os(iOS) && !targetEnvironment(macCatalyst)
+
+#else
+
+  import Foundation
+
+  public protocol NetworkStatusProtocol {
+    var networkMonitor: NetworkMonitorProtocol { get }
+    func getStatus() -> (String, Any?)
+  }
+
+#endif

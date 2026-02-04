@@ -45,4 +45,16 @@
     }
   }
 
+#else
+
+  import Foundation
+  import OpenTelemetryApi
+
+  /// No-op stub for non-Darwin platforms.
+  public class NetworkStatusInjector {
+    public init(netstat: NetworkStatus) {}
+
+    public func inject(span: Span) {}
+  }
+
 #endif // os(iOS) && !targetEnvironment(macCatalyst)
