@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#if !os(watchOS)
+#if canImport(Darwin) && !os(watchOS)
 
   import Foundation
-
   import Network
 
   public class NetworkMonitor: NetworkMonitorProtocol {
@@ -72,6 +71,18 @@
         }
       }
       return foundInterface
+    }
+  }
+
+#else
+
+  import Foundation
+
+  public class NetworkMonitor: NetworkMonitorProtocol {
+    public init() throws {}
+
+    public func getConnection() -> Connection {
+      .unavailable
     }
   }
 

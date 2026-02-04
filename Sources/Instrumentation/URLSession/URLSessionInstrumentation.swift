@@ -11,7 +11,9 @@ import OpenTelemetrySdk
   import FoundationNetworking
 #endif
 
-struct NetworkRequestState {
+#if canImport(Darwin)
+
+  struct NetworkRequestState {
   var request: URLRequest?
   var dataProcessed: Data?
 
@@ -756,3 +758,19 @@ public class URLSessionInstrumentation {
     }
   }
 }
+
+#else
+
+  public class URLSessionInstrumentation {
+    public var startedRequestSpans: [Span] {
+      []
+    }
+
+    var configuration: URLSessionInstrumentationConfiguration
+
+    public init(configuration: URLSessionInstrumentationConfiguration) {
+      self.configuration = configuration
+    }
+  }
+
+#endif

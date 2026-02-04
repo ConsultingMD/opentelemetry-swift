@@ -25,6 +25,9 @@ let package = Package(name: "opentelemetry-swift",
                         .library(name: "OTelSwiftLog", targets: ["OTelSwiftLog"]),
                         .library(name: "OTelDataCompression", type: .static, targets: ["OTelDataCompression"]),
                         .library(name: "BaggagePropagationProcessor", targets: ["BaggagePropagationProcessor"]),
+                        .library(name: "URLSessionInstrumentation", targets: ["URLSessionInstrumentation"]),
+                        .library(name: "ResourceExtension", targets: ["ResourceExtension"]),
+                        .library(name: "NetworkStatus", targets: ["NetworkStatus"]),
                         .executable(name: "ConcurrencyContext", targets: ["ConcurrencyContext"]),
                         .executable(name: "loggingTracer", targets: ["LoggingTracer"]),
                         .executable(name: "StableMetricSample", targets: ["StableMetricSample"])
@@ -92,6 +95,20 @@ let package = Package(name: "opentelemetry-swift",
                                 dependencies: ["OpenTelemetryApi",
                                                "OpenTelemetrySdk"],
                                 path: "Sources/Contrib/Processors/BaggagePropagationProcessor"),
+                        .target(name: "URLSessionInstrumentation",
+                                dependencies: ["OpenTelemetrySdk", "NetworkStatus"],
+                                path: "Sources/Instrumentation/URLSession",
+                                exclude: ["README.md"]),
+                        .target(name: "ResourceExtension",
+                                dependencies: ["OpenTelemetrySdk"],
+                                path: "Sources/Instrumentation/SDKResourceExtension",
+                                exclude: ["README.md"]),
+                        .target(name: "NetworkStatus",
+                                dependencies: [
+                                  "OpenTelemetryApi"
+                                ],
+                                path: "Sources/Instrumentation/NetworkStatus",
+                                linkerSettings: [.linkedFramework("CoreTelephony", .when(platforms: [.iOS]))]),
                         .testTarget(name: "OTelSwiftLogTests",
                                     dependencies: ["OTelSwiftLog"],
                                     path: "Tests/BridgesTests/OTelSwiftLog"),
@@ -170,13 +187,10 @@ extension Package {
       products.append(contentsOf: [
         .library(name: "JaegerExporter", targets: ["JaegerExporter"]),
         .executable(name: "simpleExporter", targets: ["SimpleExporter"]),
-        .library(name: "NetworkStatus", targets: ["NetworkStatus"]),
-        .library(name: "URLSessionInstrumentation", targets: ["URLSessionInstrumentation"]),
         .library(name: "ZipkinExporter", targets: ["ZipkinExporter"]),
         .executable(name: "OTLPExporter", targets: ["OTLPExporter"]),
         .executable(name: "OTLPHTTPExporter", targets: ["OTLPHTTPExporter"]),
-        .library(name: "SignPostIntegration", targets: ["SignPostIntegration"]),
-        .library(name: "ResourceExtension", targets: ["ResourceExtension"])
+        .library(name: "SignPostIntegration", targets: ["SignPostIntegration"])
       ])
       targets.append(contentsOf: [
         .target(name: "JaegerExporter",
@@ -192,21 +206,11 @@ extension Package {
                           dependencies: ["OpenTelemetrySdk", "JaegerExporter", "StdoutExporter", "ZipkinExporter", "ResourceExtension", "SignPostIntegration"],
                           path: "Examples/Simple Exporter",
                           exclude: ["README.md"]),
-        .target(name: "NetworkStatus",
-                dependencies: [
-                  "OpenTelemetryApi"
-                ],
-                path: "Sources/Instrumentation/NetworkStatus",
-                linkerSettings: [.linkedFramework("CoreTelephony", .when(platforms: [.iOS]))]),
         .testTarget(name: "NetworkStatusTests",
                     dependencies: [
                       "NetworkStatus"
                     ],
                     path: "Tests/InstrumentationTests/NetworkStatusTests"),
-        .target(name: "URLSessionInstrumentation",
-                dependencies: ["OpenTelemetrySdk", "NetworkStatus"],
-                path: "Sources/Instrumentation/URLSession",
-                exclude: ["README.md"]),
         .testTarget(name: "URLSessionInstrumentationTests",
                     dependencies: ["URLSessionInstrumentation",
                                    .product(name: "NIO", package: "swift-nio"),
@@ -233,10 +237,6 @@ extension Package {
         .target(name: "SignPostIntegration",
                 dependencies: ["OpenTelemetrySdk"],
                 path: "Sources/Instrumentation/SignPostIntegration",
-                exclude: ["README.md"]),
-        .target(name: "ResourceExtension",
-                dependencies: ["OpenTelemetrySdk"],
-                path: "Sources/Instrumentation/SDKResourceExtension",
                 exclude: ["README.md"]),
         .testTarget(name: "ResourceExtensionTests",
                     dependencies: ["ResourceExtension", "OpenTelemetrySdk"],
