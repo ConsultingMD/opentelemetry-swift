@@ -1,0 +1,13 @@
+version: 1
+service:
+  name: opentelemetry-swift
+  description: OpenTelemetry Swift SDK and API implementation providing distributed tracing, metrics, and logging capabilities for Swift applications
+  language: swift
+  repositories:
+    - name: ConsultingMD/opentelemetry-swift
+      path: /
+      provider: github
+    - name: ConsultingMD/opentelemetry-swift
+      path: /platform
+      provider: github
+      display_name: Platform Folder
